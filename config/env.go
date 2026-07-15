@@ -12,12 +12,19 @@ import (
 func loadEnv() (*Config, error) {
 	return &Config{
 		APP: AppConfig{
-			Env:                     getEnv("APP_ENV", "development"),
-			FirebaseCredentialsPath: mustGetEnv("FIREBASE_CREDENTIALS_PATH"),
+			Env:                     EnvironmentDevelopment,
+			FirebaseCredentialsPath: mustGetEnv(EnvFirebaseCredentialsPath),
 		},
-		DB: DBConfig{},
+		DB: DBConfig{
+			Host:     mustGetEnv(EnvDBHost),
+			Port:     mustGetEnv(EnvDBPort),
+			User:     mustGetEnv(EnvDBUser),
+			Password: mustGetEnv(EnvDBPassword),
+			Name:     mustGetEnv(EnvDBName),
+			SSLMode:  DefaultSSLMode,
+		},
 		TEL: TelemetryConfig{
-			getEnv("OTEL_COLLECTOR_ADDR", "localhost:4317"),
+			getEnv(EnvOtelCollectorAddr, DefaultOtelCollectorAddr),
 		},
 	}, nil
 }
@@ -41,7 +48,7 @@ func getEnv(key, defaultValue string) string {
 
 func (c *AppConfig) GetFireBaseCredentials() (*fb.FirebaseServiceAccount, error) {
 
-	if c.Env == "production" {
+	if c.Env == EnvironmentProduction {
 
 		if c.FirebaseCredentials == nil {
 			return nil, fmt.Errorf("firebase credentials are not configured")

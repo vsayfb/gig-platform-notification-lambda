@@ -3,9 +3,9 @@ package logger
 import (
 	"log/slog"
 	"os"
-)
 
-const EnvProduction = "production"
+	"github.com/vsayfb/gig-platform-notification-lambda/config"
+)
 
 func Init(env string) {
 	opts := &slog.HandlerOptions{
@@ -15,7 +15,7 @@ func Init(env string) {
 	var handler slog.Handler
 
 	switch env {
-	case EnvProduction:
+	case config.EnvironmentProduction:
 		handler = slog.NewJSONHandler(os.Stdout, opts)
 	default:
 		handler = slog.NewTextHandler(os.Stdout, opts)

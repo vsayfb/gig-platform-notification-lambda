@@ -13,7 +13,15 @@ import (
 	"github.com/vsayfb/gig-platform-notification-lambda/pkg/fb"
 )
 
-const parameterPath = "/gerek/app"
+const ParameterPath = "/gig/app"
+
+const (
+	ParameterRDSSecretArn           = "rds-secret-arn"
+	ParameterFirebaseCredentialsArn = "firebase-credentials-arn"
+	ParameterDBHost                 = "db-host"
+	ParameterDBPort                 = "db-port"
+	ParameterDBName                 = "db-name"
+)
 
 type rdsSecret struct {
 	Username string `json:"username"`
@@ -38,27 +46,27 @@ func loadAWS(ctx context.Context) (*Config, error) {
 
 	var dbSecret rdsSecret
 
-	if err := loadSecret(ctx, secretClient, params["rds-secret-arn"], &dbSecret); err != nil {
+	if err := loadSecret(ctx, secretClient, params[ParameterRDSSecretArn], &dbSecret); err != nil {
 		return nil, err
 	}
 
 	var creds fb.FirebaseServiceAccount
 
-	if err := loadSecret(ctx, secretClient, params["firebase-credentials-arn"], &creds); err != nil {
+	if err := loadSecret(ctx, secretClient, params[ParameterFirebaseCredentialsArn], &creds); err != nil {
 		return nil, err
 	}
 
 	return &Config{
 		DB: DBConfig{
-			Host:     params["db-host"],
-			Port:     params["db-port"],
+			Host:     params[ParameterDBHost],
+			Port:     params[ParameterDBPort],
 			User:     dbSecret.Username,
 			Password: dbSecret.Password,
-			Name:     params["db-name"],
+			Name:     params[ParameterDBName],
 			SSLMode:  "require",
 		},
 		APP: AppConfig{
-			Env:                 "production",
+			Env:                 EnvironmentProduction,
 			FirebaseCredentials: &creds,
 		},
 	}, nil
@@ -66,11 +74,11 @@ func loadAWS(ctx context.Context) (*Config, error) {
 
 func loadParameters(ctx context.Context, client *ssm.Client) (map[string]string, error) {
 	names := []string{
-		parameter("db-host"),
-		parameter("db-port"),
-		parameter("db-name"),
-		parameter("firebase-credentials-arn"),
-		parameter("rds-secret-arn"),
+		parameter(ParameterDBHost),
+		parameter(ParameterDBPort),
+		parameter(ParameterDBName),
+		parameter(ParameterFirebaseCredentialsArn),
+		parameter(ParameterRDSSecretArn),
 	}
 
 	out, err := client.GetParameters(ctx, &ssm.GetParametersInput{
@@ -85,7 +93,7 @@ func loadParameters(ctx context.Context, client *ssm.Client) (map[string]string,
 	params := make(map[string]string)
 
 	for _, p := range out.Parameters {
-		key := strings.TrimPrefix(aws.ToString(p.Name), parameterPath+"/")
+		key := strings.TrimPrefix(aws.ToString(p.Name), ParameterPath+"/")
 		params[key] = aws.ToString(p.Value)
 	}
 
@@ -111,5 +119,5 @@ func loadSecret(
 }
 
 func parameter(name string) string {
-	return parameterPath + "/" + name
+	return ParameterPath + "/" + name
 }

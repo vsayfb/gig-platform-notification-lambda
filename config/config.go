@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/vsayfb/gig-platform-notification-lambda/pkg/fb"
 )
@@ -33,9 +34,9 @@ type DBConfig struct {
 }
 
 func Load(ctx context.Context) (*Config, error) {
-	env := getEnv("APP_ENV", "development")
+	env := os.Getenv(AppEnv)
 
-	if env == "production" {
+	if env == EnvironmentProduction {
 		return loadAWS(ctx)
 	}
 
