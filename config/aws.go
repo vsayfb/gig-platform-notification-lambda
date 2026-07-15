@@ -44,7 +44,7 @@ func loadAWS(ctx context.Context) (*Config, error) {
 
 	var creds fb.FirebaseServiceAccount
 
-	if err := loadSecret(ctx, secretClient, params["firebase-secret-arn"], &creds); err != nil {
+	if err := loadSecret(ctx, secretClient, params["firebase-credentials-arn"], &creds); err != nil {
 		return nil, err
 	}
 
@@ -69,7 +69,7 @@ func loadParameters(ctx context.Context, client *ssm.Client) (map[string]string,
 		parameter("db-host"),
 		parameter("db-port"),
 		parameter("db-name"),
-		parameter("firebase-secret-arn"),
+		parameter("firebase-credentials-arn"),
 		parameter("rds-secret-arn"),
 	}
 
