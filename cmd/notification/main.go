@@ -1,37 +1,18 @@
 package main
 
 import (
-	"context"
 	"log"
 
-	"github.com/vsayfb/gig-platform-notification-lambda/config"
-	"github.com/vsayfb/gig-platform-notification-lambda/pkg/database"
-	"github.com/vsayfb/gig-platform-notification-lambda/pkg/fb"
-	"github.com/vsayfb/gig-platform-notification-lambda/pkg/logger"
+	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/vsayfb/gig-platform-notification-lambda/internal/bootstrap"
 )
 
 func main() {
-	ctx := context.Background()
-
-	cfg, err := config.Load(ctx)
+	h, err := bootstrap.NewHandler()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	logger.Init(cfg.APP.Env)
-
-	_, err = database.NewPool(ctx, cfg.DB.DSN())
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	creds, err := cfg.APP.GetFireBaseCredentials()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = fb.NewClient(ctx, creds)
+	lambda.Start(h.Handle)
 }
