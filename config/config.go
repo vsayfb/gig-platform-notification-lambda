@@ -3,6 +3,8 @@ package config
 import (
 	"context"
 	"fmt"
+
+	"github.com/vsayfb/gig-platform-notification-lambda/pkg/fb"
 )
 
 type Config struct {
@@ -14,6 +16,7 @@ type Config struct {
 type AppConfig struct {
 	Env                     string
 	FirebaseCredentialsPath string
+	FirebaseCredentials     *fb.FirebaseServiceAccount
 }
 
 type TelemetryConfig struct {
@@ -30,6 +33,12 @@ type DBConfig struct {
 }
 
 func Load(ctx context.Context) (*Config, error) {
+	env := getEnv("APP_ENV", "development")
+
+	if env == "production" {
+		return loadAWS(ctx)
+	}
+
 	return loadEnv()
 }
 
