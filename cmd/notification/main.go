@@ -6,6 +6,7 @@ import (
 
 	"github.com/vsayfb/gig-platform-notification-lambda/config"
 	"github.com/vsayfb/gig-platform-notification-lambda/pkg/database"
+	"github.com/vsayfb/gig-platform-notification-lambda/pkg/fb"
 )
 
 func main() {
@@ -23,4 +24,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	creds, err := cfg.APP.GetFireBaseCredentials()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = fb.NewClient(ctx, creds)
 }
